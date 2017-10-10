@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultCSVTagName     = "csv"
-	defaultCSVTagFieldSep = ";"
+	defaultCSVTagFieldSep = ","
 )
 
 type DecodeStruct struct {

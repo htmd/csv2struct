@@ -15,11 +15,11 @@ import (
 )
 
 type Record struct {
-	StringField string  `csv:"String Field;required"`
-	IntField    int     `csv:"Integer Field;required"`
-	UintField   uint    `csv:"Unsigned Integer Field;required"`
-	BoolField   bool    `csv:"Boolean Field;required"`
-	FloatField  float64 `csv:"Float Field;required"`
+	StringField string  `csv:"String Field,required"`
+	IntField    int     `csv:"Integer Field,required"`
+	UintField   uint    `csv:"Unsigned Integer Field,required"`
+	BoolField   bool    `csv:"Boolean Field,required"`
+	FloatField  float64 `csv:"Float Field,required"`
 
 	OptionalTimeField  time.Time `csv:"Optional Time Field"`
 	OptionalIntField   int
