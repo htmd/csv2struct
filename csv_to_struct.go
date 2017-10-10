@@ -182,91 +182,66 @@ func (r *DecodeStruct) unmarshal(rv reflect.Value, record []string) error {
 }
 
 func (r *DecodeStruct) setField(f reflect.Value, s string) error {
-	if f.Kind() == reflect.Ptr {
+	switch f.Kind() {
+	case reflect.Ptr:
 		z := reflect.New(f.Type().Elem())
 		f.Set(z)
 		f = reflect.Indirect(f)
-	}
-	switch f.Interface().(type) {
-	case string:
-		f.SetString(s)
-	case bool:
-		b, err := strconv.ParseBool(s)
-		if err != nil {
-			return err
-		}
-		f.SetBool(b)
-	case int, int8, int16, int32, int64:
-		i, err := strconv.ParseInt(s, 10, 0)
-		if err != nil {
-			return err
-		}
-		f.SetInt(i)
-	case uint, uint8, uint16, uint32, uint64:
-		ui, err := strconv.ParseUint(s, 10, 0)
-		if err != nil {
-			return err
-		}
-		f.SetUint(ui)
-	case float32, float64:
-		fv, err := strconv.ParseFloat(s, 64)
-		if err != nil {
-			return err
-		}
-		f.SetFloat(fv)
-	case time.Time:
-		t, err := time.Parse(r.timeFormat, s)
-		if err != nil {
-			return err
-		}
-		f.Set(reflect.ValueOf(t))
-	default:
-		return r.setCustomField(f, s)
-	}
-
-	return nil
-}
-
-func (r *DecodeStruct) setCustomField(f reflect.Value, s string) error {
-	switch f.Kind() {
+		return r.setField(f, s)
 	case reflect.String:
 		f.SetString(s)
+		return nil
 	case reflect.Bool:
 		b, err := strconv.ParseBool(s)
 		if err != nil {
 			return err
 		}
 		f.SetBool(b)
+		return nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		i, err := strconv.ParseInt(s, 10, 0)
 		if err != nil {
 			return err
 		}
 		f.SetInt(i)
+		return nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		ui, err := strconv.ParseUint(s, 10, 0)
 		if err != nil {
 			return err
 		}
 		f.SetUint(ui)
+		return nil
 	case reflect.Float32, reflect.Float64:
 		fv, err := strconv.ParseFloat(s, 64)
 		if err != nil {
 			return err
 		}
 		f.SetFloat(fv)
+		return nil
+	case reflect.Struct:
+		// support struct for only time.Time
+		if s := f.Type().String(); s != "time.Time" {
+			return fmt.Errorf("CSV struct reader does not support struct field with type: %s", s)
+		}
+		t, err := time.Parse(r.timeFormat, s)
+		if err != nil {
+			return err
+		}
+		f.Set(reflect.ValueOf(t))
+		return nil
 	default:
-		return fmt.Errorf("CSV struct reader does not support struct field with type: %s", f.String())
-
+		return fmt.Errorf("CSV struct reader does not support struct field with type: %s", f.Type().String())
 	}
-	return nil
 }
 
 // isSupportedField
 func isSupportedField(f reflect.Type) bool {
 	switch f.Kind() {
-	case reflect.Map, reflect.Slice, reflect.Array:
-		return false
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64, reflect.Bool, reflect.String:
+		return true
 	case reflect.Struct:
 		if f.String() == "time.Time" {
 			return true
@@ -275,7 +250,6 @@ func isSupportedField(f reflect.Type) bool {
 	case reflect.Ptr:
 		return isSupportedField(f.Elem())
 	default:
-		return true
+		return false
 	}
-
 }
