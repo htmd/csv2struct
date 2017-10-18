@@ -172,7 +172,7 @@ func TestDecodeStruct_UnmarshalCSV(t *testing.T) {
 		"-30",
 		"-200",
 		"true",
-		"50",
+		"",
 		"-10",
 		now.Format(time.RFC3339),
 	}
@@ -194,7 +194,7 @@ func TestDecodeStruct_UnmarshalCSV(t *testing.T) {
 		UintField:          100,
 		BoolField:          true,
 		FloatField:         -200.0,
-		OptionalIntField:   50,
+		OptionalIntField:   0,
 		OptionalIntPointer: &pInt,
 		OptionalTimeField:  now,
 	}

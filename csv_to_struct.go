@@ -171,6 +171,9 @@ func (r *DecodeStruct) reset() *DecodeStruct {
 func (r *DecodeStruct) unmarshal(rv reflect.Value, record []string) error {
 	for _, c := range r.foundCols {
 		s := record[c.RecordIndex]
+		if !c.Required && len(s) == 0 {
+			continue // ignore empty value for optional column
+		}
 		f := rv.Field(c.StructFieldIndex)
 		if f.CanSet() {
 			if err := r.setField(f, s); err != nil {
